@@ -7,7 +7,7 @@ metadata:
   labels:
     app: cadang-svc
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: cadang-pod
   ports:
