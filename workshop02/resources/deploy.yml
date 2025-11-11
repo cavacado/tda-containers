@@ -1,0 +1,27 @@
+---
+# deployment definition
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: cadang-deploy
+  namespace: cadang-ns
+  labels:
+    app: cadang-deploy
+spec:
+  # 3 Pods should exist at all times.
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cadang-pod
+  template:
+    metadata:
+      labels:
+        app: cadang-pod
+    spec:
+      containers:
+        - name: ng-app
+          image: cavacado/ng-app:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080

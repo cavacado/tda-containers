@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cadang-svc
+  namespace: cadang-ns
+  labels:
+    app: cadang-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: cadang-pod
+  ports:
+    - port: 80
+      targetPort: 8080

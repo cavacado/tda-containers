@@ -1,0 +1,47 @@
+# combination files namespace provision and deployment provision
+# first virtual file | namespace defintion
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myns
+  labels:
+    name: myns
+
+---
+# second virtual file | deployment definition
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: deployment-example
+  namespace: myns
+  labels:
+    app: deployment-example-app
+spec:
+  # 4 Pods should exist at all times.
+  replicas: 4
+  selector:
+    matchLabels:
+      app: pod-example
+  template:
+    metadata:
+      name: pod-example
+      labels:
+        app: pod-example
+      namespace: myns
+    spec:
+      containers:
+        - name: dov-bear-container
+          image: chukmunnlee/dov-bear:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              # dont want to hardcode this, use ConfigMap/Secrets
+              value: "5000"
+            - name: INSTANCE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          ports:
+            - containerPort: 5000
