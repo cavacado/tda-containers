@@ -13,5 +13,6 @@ spec:
     app: bggapp
     name: bggapp-po
   ports:
-  - port: 5000
-    targetPort: 5000
+  - name: bggapp-svc-port
+    port: 5000
+    targetPort: bggapp-port

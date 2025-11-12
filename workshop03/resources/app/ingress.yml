@@ -19,4 +19,4 @@ spec:
               service:
                 name: bggapp-svc
                 port:
-                  number: 5000
+                  name: bggapp-svc-port
