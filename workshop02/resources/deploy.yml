@@ -11,6 +11,13 @@ metadata:
 spec:
   # 3 Pods should exist at all times.
   replicas: 3
+  strategy:
+    type: RollingUpdate
+    # at most only 2 pods will exist when rolling updates are performed
+    rollingUpdate:
+      # prefer to use percentages instead of absolutes
+      maxSurge: 30%
+      maxUnavailable: 30%
   selector:
     matchLabels:
       app: cadang-pod
@@ -21,7 +28,7 @@ spec:
     spec:
       containers:
         - name: ng-app
-          image: cavacado/ng-app:v2
+          image: chukmunnlee/cfdsa-fortune:v1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
