@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: ng-app
-          image: cavacado/ng-app:v1
+          image: cavacado/ng-app:v2
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: 3000
