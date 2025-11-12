@@ -28,7 +28,8 @@ spec:
     spec:
       containers:
         - name: ng-app
-          image: chukmunnlee/cfdsa-fortune:v1
+          image: cavacado/ng-app:v2
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3000
+            - name: web-port
+              containerPort: 3000
