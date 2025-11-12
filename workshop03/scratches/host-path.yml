@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  volumes:
+    - name: data-vol
+      # never ever use hostPath!
+      # pod will write data into the node
+      # if pod dies, another pod can replace it and access the written data
+      # writing too much to the node can bring it down when storage overfills
+      hostPath:
+        path: /tmp
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - mountPath: /var/data
+          name: data-vol

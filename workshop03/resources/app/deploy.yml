@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bggapp-deploy
+  namespace: bggns
+  labels:
+    app: bggapp
+    name: bggapp-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bggapp
+      name: bggapp-po
+  template:
+    metadata:
+      name: bggapp-po
+      labels:
+        app: bggapp
+        name: bggapp-po
+    spec:
+      containers:
+      - name: bggapp-container
+        image: chukmunnlee/bgg-app:nov-2025
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "96Mi"
+            cpu: "64m"
+        env:
+          - name: BGG_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: secret-map
+          - name: BGG_DB_USER
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USER
+                name: config-map
+          - name: BGG_DB_HOST
+            value: bggdb-svc.bggns.svc.cluster.local
+          - name: BGG_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: config-map
+        ports:
+        - containerPort: 5000

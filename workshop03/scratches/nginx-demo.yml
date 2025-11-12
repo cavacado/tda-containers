@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  volumes:
+    - name: tmp-vol
+      # managed by kubernetes
+      # when pod dies, the emptyDir will be cleared
+      # used for intercommunication with 2 containers
+      # note that still can kill the node if we write too much
+      emptyDir: {}
+    - name: html-vol
+      configMap:
+        name: data-vol
+    - name: secret-vol
+      secret:
+        secretName: secret-vol
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - mountPath: /var/data
+          name: tmp-vol
+        - mountPath: /usr/share/nginx/html
+          name: html-vol
+        - mountPath: /var/secret
+          name: secret-vol

@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bggdb-deploy
+  namespace: bggns
+  labels:
+    app: bggdb
+    name: bggdb-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bggdb
+      name: bggdb-po
+  template:
+    metadata:
+      name: bggdb-po
+      labels:
+        app: bggdb
+        name: bggdb-po
+    spec:
+      volumes:
+        - name: data-vol
+          persistentVolumeClaim:
+            claimName: bggdb-pvc
+      containers:
+      - name: bggdb-container
+        image: chukmunnlee/bgg-database:nov-2025
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: secret-map
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: data-vol
+        ports:
+        - containerPort: 3306
