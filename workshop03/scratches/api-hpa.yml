@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deploy
+  namespace: api
+  labels:
+    app: api
+    name: api-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api
+      name: api-po
+      version: v1
+  template:
+    metadata:
+      name: api-po
+      labels:
+        app: api
+        name: api-po
+        version: v1
+    spec:
+      containers:
+        - name: api-container
+          image: chukmunnlee/fake-api:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 64m
+            limits:
+              memory: 120Mi
+              cpu: 64m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-svc
+  namespace: api
+  labels:
+    app: api
+    name: api-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: api
+    name: api-po
+    version: v1
+  ports:
+    - port: 3000
+      targetPort: 3000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  namespace: api
+spec:
+  minReplicas: 1
+  maxReplicas: 6
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-deploy
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 30
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 30

@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-data-svc
+  namespace: minions
+spec:
+  type: ClusterIP
+  selector:
+    app: minio
+    name: minio-po
+  ports:
+    - port: 9000
+      targetPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-console-svc
+  namespace: minions
+spec:
+  type: ClusterIP
+  selector:
+    app: minio
+    name: minio-po
+  ports:
+    - port: 9001
+      targetPort: 9001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-internal-svc
+  namespace: minions
+spec:
+  clusterIP: None
+  selector:
+    app: minio
+    name: minio-po
+  ports:
+    - port: 9000
+      name: minio-internal-data
+      targetPort: 9000
+    - port: 9001
+      name: minio-internal-console
+      targetPort: 9001

@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: dev-ns
+
+labels:
+  - pairs:
+      env: dev
+    includeSelectors: true
+    includeTemplates: true
+
+secretGenerator:
+  - name: myns-secret
+    behavior: merge
+    literals:
+      - INSTANCE_NAME=dev-dov-bear
+
+configMapGenerator:
+  - name: myns-config
+    behavior: merge
+    literals:
+      - INSTANCE_HASH=123456
+
+patches:
+  - target:
+      kind: Ingress
+      name: myns-ing
+    patch: |
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.209.38.57.64.sslip.io

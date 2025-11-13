@@ -1,0 +1,99 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myns-config
+  namespace: myns
+data:
+  PORT: "5000"
+  INSTANCE_HASH: 3457ab49ca7b562233bee4ee4cc6cf19
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: myns-secret
+  namespace: myns
+type: Opaque
+data:
+  INSTANCE_NAME: ZG92X2JlYXI=
+---
+# deployment definition
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Unique key of the Deployment instance
+  name: myns-deploy
+  namespace: myns
+  labels:
+    app: myns-deploy
+spec:
+  # 4 Pods should exist at all times.
+  replicas: 4
+  selector:
+    matchLabels:
+      app: myns-pod
+  template:
+    metadata:
+      labels:
+        app: myns-pod
+    spec:
+      containers:
+        - name: myns-container
+          image: chukmunnlee/dov-bear:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: myns-config
+                  key: PORT
+            - name: INSTANCE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: myns-secret
+                  key: INSTANCE_NAME
+            - name: INSTANCE_HASH
+              valueFrom:
+                configMapKeyRef:
+                  name: myns-config
+                  key: INSTANCE_HASH
+          ports:
+            - name: myns-port
+              containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myns-svc
+  namespace: myns
+  labels:
+    app: myns-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: myns-pod
+  ports:
+    - port: 80
+      targetPort: myns-port
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myns-ing
+  namespace: myns
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.localhost
+      http:
+        paths:
+          # any request that comes in to path /, goes to the backend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myns-svc
+                port:
+                  number: 80

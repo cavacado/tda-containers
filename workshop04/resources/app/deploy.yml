@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio-deploy
+  namespace: minions
+  labels:
+    app: minio
+    name: minio-deploy
+spec:
+  serviceName: minio-internal-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: minio
+      name: minio-po
+  template:
+    metadata:
+      name: minio-po
+      labels:
+        app: minio
+        name: minio-po
+    spec:
+      containers:
+      - name: minio-container
+        image: minio/minio
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MINIO_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: MINIO_ROOT_PASSWORD
+                name: minio-secret
+          - name: MINIO_ROOT_USER
+            valueFrom:
+              configMapKeyRef:
+                key: MINIO_ROOT_USER
+                name: minio-config
+        volumeMounts:
+          - mountPath: /data
+            name: minio-pvc
+        args:
+          - server
+          - --console-address=:9001
+          - --address=:9000
+          - http://minio-deploy-{0...2}.minio-internal-svc.minions.svc.cluster.local/data
+        ports:
+        - name: data
+          containerPort: 9000
+        - name: console
+          containerPort: 9001
+  volumeClaimTemplates:
+    - metadata:
+        name: minio-pvc
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: do-block-storage
+        resources:
+          requests:
+            storage: 1Gi
